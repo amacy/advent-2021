@@ -1,6 +1,6 @@
 require_relative "../day_02"
 
-RSpec.describe Day01 do
+RSpec.describe Day02 do
   context "part 1" do
     it "works for the sample input" do
       input = <<~INPUT
