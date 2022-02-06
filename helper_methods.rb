@@ -1,3 +1,5 @@
+require "pry"
+
 module HelperMethods
   def string_to_number_array(string)
     string.split(//).map(&:to_i)
