@@ -1,82 +1,72 @@
+require_relative "helper_methods"
+
 class Day03
+  extend HelperMethods
+
   def self.part_1(input)
-    array = input.split(/\n/).map { |line| line.split(//).map(&:to_i) }
-    gamma_bit_counts = _count_gamma_bits(array[0], array[1..-1], [])
+    parsed_input = _parse_input(input)
+    gamma_bit_counts = _count_gamma_bits(parsed_input, [])
 
-    gamma_rate = _gamma_rate(
-      gamma_bit_counts,
-      lambda { |bit| bit > (array.length / 2) ? 1 : 0 },
-    )
+    gamma_rate = _gamma_rate(gamma_bit_counts, parsed_input.length)
 
-    gamma_rate.to_i(2) * _epsilon_rate(gamma_rate).to_i(2)
+    bit_to_decimal(gamma_rate) *
+      bit_to_decimal(_epsilon_rate(gamma_rate))
   end
 
   def self.part_2(input)
-    array = input.split(/\n/).map { |line| line.split(//).map(&:to_i) }
-    gamma_bit_counts = _count_gamma_bits(array[0], array[1..-1], [])
+    parsed_input = _parse_input(input)
+    gamma_bit_counts = _count_gamma_bits(parsed_input, [])
 
-    gamma_rate_function_1 = -> (gamma_bit_counts, array) {
-      _gamma_rate(
-        gamma_bit_counts,
-        lambda { |bit| bit >= (array.length - bit) ? 1 : 0 },
-      ).split(//).map(&:to_i)
+    oxygen_generator_rating_function = -> (gamma_bit_counts, array) {
+      string_to_number_array(
+        _gamma_rate(gamma_bit_counts, array.length)
+      )
     }
 
     oxygen_generator_rating = _oxygen_generator_or_co2_scrubber_rating(
-      array,
-      gamma_rate_function_1.call(gamma_bit_counts, array),
-      gamma_rate_function_1,
+      parsed_input,
+      oxygen_generator_rating_function.call(gamma_bit_counts, parsed_input),
+      oxygen_generator_rating_function,
       0,
     )
 
-    gamma_rate_function_2 = -> (gamma_bit_counts, array) {
-      puts 'another time thru'
-      puts array.inspect
-      _epsilon_rate(
-        _gamma_rate(
-          gamma_bit_counts,
-          lambda { |bit|
-            if array.length == 2
-              puts "bit"
-              puts bit
-            end
-            # bit > (array.length - bit) ? 1 : 0
-            bit >= (array.length - bit) ? 1 : 0
-          },
+    co2_scrubber_rating_function = -> (gamma_bit_counts, array) {
+      string_to_number_array(
+        _epsilon_rate(
+          _gamma_rate(gamma_bit_counts, array.length)
         )
-      ).split(//).map(&:to_i)
+      )
     }
 
     co2_scrubber_rating = _oxygen_generator_or_co2_scrubber_rating(
-      array,
-      gamma_rate_function_2.call(gamma_bit_counts, array),
-      gamma_rate_function_2,
+      parsed_input,
+      co2_scrubber_rating_function.call(gamma_bit_counts, parsed_input),
+      co2_scrubber_rating_function,
       0,
     )
-    puts oxygen_generator_rating.join
-    puts oxygen_generator_rating.join.to_i(2)
-    puts co2_scrubber_rating.join
-    puts co2_scrubber_rating.join.to_i(2)
 
-    oxygen_generator_rating.join.to_i(2) * co2_scrubber_rating.join.to_i(2)
+    bit_to_decimal(oxygen_generator_rating.join) *
+      bit_to_decimal(co2_scrubber_rating.join)
   end
 
   private
 
-  def self._count_gamma_bits(head, tail, array)
+  def self._count_gamma_bits(remaining_input, acc)
+    head, tail = cons(remaining_input)
+
     if head.nil?
-      array
+      acc
     else
-      new_array = head.map.with_index do |bit, index|
-        bit + array[index].to_i
-      end
-      _count_gamma_bits(tail[0], tail[1..-1], new_array)
+      _count_gamma_bits(
+        tail,
+        head.map.with_index { |bit, index| bit + acc[index].to_i }
+      )
     end
   end
 
-  def self._gamma_rate(bit_counts, count_function)
+  def self._gamma_rate(bit_counts, input_length)
     bit_counts.map do |bit|
-      count_function.call(bit)
+      _count_function.call(bit, input_length)
     end.map(&:to_s).join
   end
 
@@ -92,7 +82,7 @@ class Day03
     else
       new_array = array.select { |binary| binary[index] == rate[index] }
       rate = rate_function.call(
-        _count_gamma_bits(new_array[0], new_array[1..-1], []),
+        _count_gamma_bits(new_array, []),
         new_array,
       )
 
@@ -103,5 +93,13 @@ class Day03
         index + 1,
       )
     end
+  end
+
+  def self._parse_input(input)
+    input.split(/\n/).map { |string| string_to_number_array(string) }
+  end
+
+  def self._count_function
+    lambda { |bit, input_length| bit >= (input_length - bit) ? 1 : 0 }
   end
 end
