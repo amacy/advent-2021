@@ -19,8 +19,9 @@ class Day04
     winning_number, remaining_numbers = cons(numbers)
     updated_boards = _update_boards(winning_number, boards)
 
-    if winning_board = (_winning_row(updated_boards) || _winning_column(updated_boards))
-      _calculate_total(winning_board, winning_number)
+    winning_boards = _winning_row(updated_boards) || _winning_column(updated_boards)
+    if winning_boards.length > 0
+      _calculate_total(winning_boards.first, winning_number)
     else
       _part_1(remaining_numbers, updated_boards)
     end
@@ -31,20 +32,26 @@ class Day04
     binding.pry if winning_number.nil?
     updated_boards = _update_boards(winning_number, boards)
 
-    if winning_board = _winning_row(updated_boards)
-      remaining_boards = _remove_board(winning_board, updated_boards)
+    winning_boards_1 = _winning_row(updated_boards)
+    if winning_boards_1.length > 0
+      remaining_boards = _remove_boards(winning_boards_1, updated_boards)
+      binding.pry if updated_boards.count == remaining_boards.count
 
       if remaining_boards.length == 0
-        _calculate_total(winning_board, winning_number)
+        _calculate_total(winning_board_1, winning_number)
       else
         _part_2(remaining_numbers, remaining_boards)
       end
-    elsif winning_board = _winning_column(updated_boards)
+    end
+
+    winning_boards_2 = _winning_column(updated_boards)
+    if winning_boards_2.length > 0
       flipped_boards = _flip_boards(updated_boards)
-      remaining_boards = _remove_board(winning_board, flipped_boards)
+      remaining_boards = _remove_boards(winning_boards_2, flipped_boards)
+      binding.pry if flipped_boards.count == remaining_boards.count
 
       if remaining_boards.length == 0
-        _calculate_total(winning_board, winning_number)
+        _calculate_total(winning_boards_2.first, winning_number)
       else
         _part_2(remaining_numbers, remaining_boards)
       end
@@ -53,11 +60,15 @@ class Day04
     end
   end
 
-  def self._remove_board(board_to_remove, all_boards)
-    numbers_to_find = board_to_remove.first.map(&:first)
+  def self._remove_boards(boards_to_remove, all_boards)
+    numbers_to_find = boards_to_remove.map do |board_to_remove|
+      board_to_remove.first.map(&:first)
+    end
 
-    all_boards.select do |board|
-      board.first.map(&:first) != numbers_to_find
+    all_boards.reject do |board|
+      numbers_to_find.any? do |numbers|
+        board.first.map(&:first) == numbers
+      end
     end
   end
 
@@ -98,15 +109,11 @@ class Day04
 	end
 
   def self._winning_row(boards)
-    boards.each do |board|
-      board.each do |row|
-        if row.map(&:last).uniq == ["winner"]
-          return board
-        end
+    boards.select do |board|
+      board.any? do |row|
+        row.map(&:last).uniq == ["winner"]
       end
     end
-
-    nil
   end
 
   def self._winning_column(boards)
