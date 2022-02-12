@@ -20,6 +20,8 @@ class Day05
   def self._part_1(nodes, grid, &diagonal_function)
     head, tail = cons(nodes)
     node_1, node_2 = head
+    x_1, y_1 = node_1
+    x_2, y_2 = node_2
 
     if node_1.nil?
       grid.inject(0) do |sum, row|
@@ -29,22 +31,22 @@ class Day05
           sum + row.compact.count { |value| value > 1 }
         end
       end
-    elsif node_1[0] == node_2[0]
-      line_ys = [node_1[1], node_2[1]]
+    elsif x_1 == x_2
+      line_ys = [y_1, y_2]
 
       new_grid = _populate_vertical(
         (line_ys.min..line_ys.max).to_a,
-        node_1[0],
+        x_1,
         grid,
       )
 
       _part_1(tail, new_grid, &diagonal_function)
-    elsif node_1[1] == node_2[1]
-      line_xs = [node_1[0], node_2[0]]
+    elsif y_1 == y_2
+      line_xs = [x_1, x_2]
 
       new_grid = _populate_horizontal(
         (line_xs.min..line_xs.max).to_a,
-        node_1[1],
+        y_1,
         grid,
       )
       _part_1(tail, new_grid, &diagonal_function)
@@ -101,11 +103,12 @@ class Day05
       grid
     else
       new_grid = grid.dup
-      head, tail = cons(nodes)
-      new_grid[head[1]] ||= []
-      new_grid[head[1]][head[0]] ||= 0
-      new_grid[head[1]][head[0]] += 1
-      _populate_diagonal(tail, new_grid)
+      node, remaining_nodes = cons(nodes)
+      x, y = node
+      new_grid[y] ||= []
+      new_grid[y][x] ||= 0
+      new_grid[y][x] += 1
+      _populate_diagonal(remaining_nodes, new_grid)
     end
   end
 
@@ -114,11 +117,11 @@ class Day05
       grid
     else
       new_grid = grid.dup
-      head, tail = cons(xs)
+      x, remaining_xs = cons(xs)
       new_grid[y] ||= []
-      new_grid[y][head] ||= 0
-      new_grid[y][head] += 1
-      _populate_horizontal(tail, y, new_grid)
+      new_grid[y][x] ||= 0
+      new_grid[y][x] += 1
+      _populate_horizontal(remaining_xs, y, new_grid)
     end
   end
 
@@ -127,11 +130,11 @@ class Day05
       grid
     else
       new_grid = grid.dup
-      head, tail = cons(ys)
-      new_grid[head] ||= []
-      new_grid[head][x] ||= 0
-      new_grid[head][x] += 1
-      _populate_vertical(tail, x, new_grid)
+      y, remaining_ys = cons(ys)
+      new_grid[y] ||= []
+      new_grid[y][x] ||= 0
+      new_grid[y][x] += 1
+      _populate_vertical(remaining_ys, x, new_grid)
     end
   end
 
