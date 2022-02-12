@@ -22,10 +22,15 @@ gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
     it "works for the input file" do
       input = File.read("spec/fixtures/day_08.txt")
 
-      expect(Day08.part_1(input)).to eq 348664
+      expect(Day08.part_1(input)).to eq 278
     end
   end
 
   context "part 2" do
+    it "works for a single line of sample input" do
+      input = "acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf"
+
+      expect(Day08.part_2(input)).to eq 5353
+    end
   end
 end
