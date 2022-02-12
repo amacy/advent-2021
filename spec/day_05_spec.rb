@@ -27,5 +27,27 @@ RSpec.describe Day05 do
   end
 
   context "part 2" do
+    it "works for the sample input" do
+      input = <<~INPUT
+        0,9 -> 5,9
+        8,0 -> 0,8
+        9,4 -> 3,4
+        2,2 -> 2,1
+        7,0 -> 7,4
+        6,4 -> 2,0
+        0,9 -> 2,9
+        3,4 -> 1,4
+        0,0 -> 8,8
+        5,5 -> 8,2
+      INPUT
+
+      expect(Day05.part_2(input)).to eq 12
+    end
+
+    it "works for the input file" do
+      input = File.read("spec/fixtures/day_05.txt")
+
+      expect(Day05.part_2(input)).to eq 19164
+    end
   end
 end
